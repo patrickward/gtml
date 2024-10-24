@@ -34,9 +34,11 @@ type TemplateManagerOptions struct {
 	Extension string
 
 	// Sources is a map of file systems to use for the templates. The string key is also used as a prefix for the template names.
+	// If the key is empty or "-" it will be treated as the default file system and no prefix will be added when rendering views.
+	// If the key is not empty, it will be prefixed to the template name (e.g. "foo:bar" for a template named "bar" in the "foo" file system).
 	Sources map[string]fs.FS
 
-	// Funcs is a map of functions to add to the template.FuncMap.
+	// Funcs is a map of functions to add to default set of template functions made available. See the `funcs.go` file for a list of default functions.
 	Funcs template.FuncMap
 
 	// Logger is the logger to use for the adapter.
@@ -44,7 +46,7 @@ type TemplateManagerOptions struct {
 }
 
 // NewTemplateManager creates a new TemplateManager.
-func NewTemplateManager(opts TemplateManagerOptions) *TemplateManager {
+func NewTemplateManager(opts TemplateManagerOptions) (*TemplateManager, error) {
 	funcMap := MergeFuncMaps(opts.Funcs)
 
 	// Set default extension if not provided
@@ -67,7 +69,7 @@ func NewTemplateManager(opts TemplateManagerOptions) *TemplateManager {
 		opts.SystemLayout = opts.BaseLayout
 	}
 
-	return &TemplateManager{
+	tm := &TemplateManager{
 		baseLayout:    opts.BaseLayout,
 		systemLayout:  opts.SystemLayout,
 		extension:     opts.Extension,
@@ -76,6 +78,8 @@ func NewTemplateManager(opts TemplateManagerOptions) *TemplateManager {
 		logger:        opts.Logger,
 		templates:     make(map[string]*template.Template),
 	}
+
+	return tm, tm.LoadTemplates()
 }
 
 // NewResponse creates a new Response instance with the TemplateManager.
@@ -83,7 +87,8 @@ func (tm *TemplateManager) NewResponse() *Response {
 	return NewResponse(tm)
 }
 
-func (tm *TemplateManager) Init() error {
+// LoadTemplates loads the templates from the configured map of file systems and caches them.
+func (tm *TemplateManager) LoadTemplates() error {
 	// Reset the template cache
 	tm.templates = make(map[string]*template.Template)
 

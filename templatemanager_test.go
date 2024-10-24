@@ -194,16 +194,14 @@ func TestTemplateManager(t *testing.T) {
 			},
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			// Initialize template manager
-			mgr := gtml.NewTemplateManager(gtml.TemplateManagerOptions{
+			// Initialize template manager and load templates
+			tm, err := gtml.NewTemplateManager(gtml.TemplateManagerOptions{
 				Extension: ".gtml",
 				Sources:   tt.sources,
 				Funcs:     funcMap,
 				Logger:    logger,
 			})
 
-			// Load templates
-			err := mgr.Init()
 			require.NoError(t, err, "Failed to load templates")
 
 			// Test rendering
@@ -213,7 +211,7 @@ func TestTemplateManager(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			mgr.NewResponse().
+			tm.NewResponse().
 				Layout(tt.layout).
 				Path(tt.page).
 				Data(tt.data.toMap()).
