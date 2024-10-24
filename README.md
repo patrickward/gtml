@@ -15,7 +15,7 @@ tm, err := gtml.NewTemplateManager(
     gtml.TemplateManagerOptions{
         Extension: ".gtml",
         Funcs:  funcs.TemplateFuncs,
-		Logger: logger,
+        Logger: logger,
     })
 
 if err != nil {
