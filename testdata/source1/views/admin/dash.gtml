@@ -1,0 +1,6 @@
+{{define "page:main"}}
+    <div class="dashboard">
+        <h2>{{.Title}}</h2>
+        <div class="dashboard-content">{{.Content}}</div>
+    </div>
+{{end}}

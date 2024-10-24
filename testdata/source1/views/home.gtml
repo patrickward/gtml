@@ -1,0 +1,7 @@
+{{define "page:main"}}
+    <div class="home-content">
+        <h2>{{.Title}}</h2>
+        <p>{{.Content}}</p>
+        <p>Welcome, {{.User}}!</p>
+    </div>
+{{end}}

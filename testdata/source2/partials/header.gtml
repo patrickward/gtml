@@ -1,0 +1,9 @@
+{{define "@source2:header"}}
+    <header class="main-header">
+        <h1>{{.Title}}</h1>
+        <h2>Source 2 Header</h2>
+        <nav>
+            {{range .Navigation}}<nav>{{.}}</nav>{{end}}
+        </nav>
+    </header>
+{{end}}

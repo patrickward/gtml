@@ -1,0 +1,12 @@
+{{define "layout:source2:clean"}}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{{.Title}}</title>
+    </head>
+    <body>
+        {{template "@source2:header" .}}
+        <main class="clean-layout-source2">{{template "page:main" .}}</main>
+    </body>
+    </html>
+{{end}}

@@ -1,0 +1,11 @@
+{{define "layout:clean"}}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{{.Title}}</title>
+    </head>
+    <body>
+        <main class="clean-layout">{{template "page:main" .}}</main>
+    </body>
+    </html>
+{{end}}

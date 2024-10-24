@@ -1,0 +1,6 @@
+{{define "@admin/header"}}
+    <div class="admin-header">
+        <h1>{{.Title}}</h1>
+        <div class="user-info">{{.User}}</div>
+    </div>
+{{end}}

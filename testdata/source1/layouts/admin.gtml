@@ -1,0 +1,12 @@
+{{define "layout:admin"}}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{{.Title}}</title>
+    </head>
+    <body class="admin-layout">
+        {{template "@admin/header" .}}
+        <main>{{template "page:main" .}}</main>
+    </body>
+    </html>
+{{end}}

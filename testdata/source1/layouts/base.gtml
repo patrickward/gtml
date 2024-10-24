@@ -1,0 +1,12 @@
+{{define "layout:base"}}
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>{{.Title}}</title>
+    </head>
+    <body>
+        {{template "@header" .}}
+        <main>{{template "page:main" .}}</main>
+    </body>
+    </html>
+{{end}}
