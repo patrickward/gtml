@@ -10,14 +10,13 @@ To use the template manager, create a new instance of `TemplateManager` with the
 
 ```go
 // Create a new template manager
-tm, err := gtml.NewTemplateManager(gtml.TemplateManagerOptions{
-    Extension: ".gtml",
-    Sources: map[string]fs.FS{
-        "-": &templates.Files
-    },
-    Funcs:  funcs.TemplateFuncs,
-    Logger: logger,
-})
+tm, err := gtml.NewTemplateManager(
+	gtml.Source{"-": &templates.Files},
+    gtml.TemplateManagerOptions{
+        Extension: ".gtml",
+        Funcs:  funcs.TemplateFuncs,
+		Logger: logger,
+    })
 
 if err != nil {
     return fmt.Errorf("error initializing template manager: %w", err)

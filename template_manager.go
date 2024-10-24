@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+type Sources map[string]fs.FS
+
 // TemplateManager is a template adapter for the HyperView framework that uses the Go html/template package.
 type TemplateManager struct {
 	baseLayout    string
@@ -33,20 +35,18 @@ type TemplateManagerOptions struct {
 	// Extension is the file extension for the templates. Default is ".html".
 	Extension string
 
-	// Sources is a map of file systems to use for the templates. The string key is also used as a prefix for the template names.
-	// If the key is empty or "-" it will be treated as the default file system and no prefix will be added when rendering views.
-	// If the key is not empty, it will be prefixed to the template name (e.g. "foo:bar" for a template named "bar" in the "foo" file system).
-	Sources map[string]fs.FS
-
 	// Funcs is a map of functions to add to default set of template functions made available. See the `funcs.go` file for a list of default functions.
 	Funcs template.FuncMap
 
-	// Logger is the logger to use for the adapter.
+	// Logger is the logger to use for logging errors. Default is nil.
 	Logger *slog.Logger
 }
 
 // NewTemplateManager creates a new TemplateManager.
-func NewTemplateManager(opts TemplateManagerOptions) (*TemplateManager, error) {
+// Accepts a map of file systems, a logger, and options for configuration.
+// For sources, if the string key is empty or "-", it will be treated as the default file system. Otherwise, it will be prefixed to the template name.
+// e.g., "foo:bar" for a template named "bar" in the "foo" file system.
+func NewTemplateManager(sources Sources, opts TemplateManagerOptions) (*TemplateManager, error) {
 	funcMap := MergeFuncMaps(opts.Funcs)
 
 	// Set default extension if not provided
@@ -70,12 +70,12 @@ func NewTemplateManager(opts TemplateManagerOptions) (*TemplateManager, error) {
 	}
 
 	tm := &TemplateManager{
+		fileSystemMap: sources,
+		logger:        opts.Logger,
 		baseLayout:    opts.BaseLayout,
 		systemLayout:  opts.SystemLayout,
 		extension:     opts.Extension,
-		fileSystemMap: opts.Sources,
 		funcMap:       funcMap,
-		logger:        opts.Logger,
 		templates:     make(map[string]*template.Template),
 	}
 
@@ -190,10 +190,10 @@ func (tm *TemplateManager) loadLayoutsAndPartials() (*template.Template, error) 
 
 func (tm *TemplateManager) printTemplateNames() {
 	for name, tmpl := range tm.templates {
-		tm.logger.Info("Template", slog.String("name", name))
+		tm.log(logLevelInfo, "Template", slog.String("name", name))
 		associatedTemplates := tmpl.Templates()
 		for _, tmpl := range associatedTemplates {
-			tm.logger.Info("    Partial/Child", slog.String("name", tmpl.Name()))
+			tm.log(logLevelInfo, "    Partial/Child", slog.String("name", tmpl.Name()))
 		}
 	}
 }
@@ -265,4 +265,26 @@ func (tm *TemplateManager) pathWithExtension(path string) string {
 	}
 
 	return curPath
+}
+
+type logLevel string
+
+const (
+	logLevelInfo  logLevel = "info"
+	logLevelWarn  logLevel = "warn"
+	logLevelError logLevel = "error"
+)
+
+// log
+func (tm *TemplateManager) log(level logLevel, msg string, args ...any) {
+	if tm.logger != nil {
+		switch level {
+		case logLevelInfo:
+			tm.logger.Info(msg, args...)
+		case logLevelWarn:
+			tm.logger.Warn(msg, args...)
+		case logLevelError:
+			tm.logger.Error(msg, args...)
+		}
+	}
 }

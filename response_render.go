@@ -61,14 +61,14 @@ func (resp *Response) RenderNotFound(w http.ResponseWriter, r *http.Request) {
 // RenderSystemError renders the 500 Internal Server Error page
 func (resp *Response) RenderSystemError(w http.ResponseWriter, r *http.Request, err error) {
 	// Get the stack trace and output to the log
-	resp.tm.logger.Error("Server error", slog.String("err", err.Error()))
+	resp.tm.log(logLevelError, "Server error", slog.String("err", err.Error()))
 	lineErrors := ""
 	lines := strings.Split(string(debug.Stack()), "\n")
 	for i, line := range lines {
 		// replace \t with 4 spaces
 		line = strings.ReplaceAll(line, "\t", "    ")
 		lineErrors += fmt.Sprintf("--- traceLine%03d: %s\n", i, line)
-		resp.tm.logger.Error("Stack trace", slog.String(fmt.Sprintf("--- traceLine%03d", i), line))
+		resp.tm.log(logLevelError, "Stack trace", slog.String(fmt.Sprintf("--- traceLine%03d", i), line))
 	}
 
 	// If there is a template with the name "system/server_error" in the template cache, use it

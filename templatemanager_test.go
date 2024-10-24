@@ -2,7 +2,6 @@ package gtml_test
 
 import (
 	"html/template"
-	"io/fs"
 	"log/slog"
 	"net/http/httptest"
 	"strings"
@@ -37,7 +36,7 @@ func (td TestData) toMap() map[string]interface{} {
 func TestTemplateManager(t *testing.T) {
 	tests := []struct {
 		name           string
-		sources        map[string]fs.FS
+		sources        gtml.Sources
 		layout         string
 		page           string
 		data           TestData
@@ -49,7 +48,7 @@ func TestTemplateManager(t *testing.T) {
 	}{
 		{
 			name: "basic page with base layout from source1",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"": source1.FS,
 			},
 			layout: "base",
@@ -76,7 +75,7 @@ func TestTemplateManager(t *testing.T) {
 		},
 		{
 			name: "basic page with base layout from source1 and prefixed path",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"foobar": source1.FS,
 			},
 			layout: "base",
@@ -103,7 +102,7 @@ func TestTemplateManager(t *testing.T) {
 		},
 		{
 			name: "admin page with admin layout from source1",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"": source1.FS,
 			},
 			layout: "admin",
@@ -130,7 +129,7 @@ func TestTemplateManager(t *testing.T) {
 		},
 		{
 			name: "multiple sources with override",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"":        source1.FS,
 				"source2": source2.FS,
 			},
@@ -154,7 +153,7 @@ func TestTemplateManager(t *testing.T) {
 		},
 		{
 			name: "non-existent layout",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"": source1.FS,
 			},
 			layout:         "missing",
@@ -170,7 +169,7 @@ func TestTemplateManager(t *testing.T) {
 		},
 		{
 			name: "non-existent page",
-			sources: map[string]fs.FS{
+			sources: gtml.Sources{
 				"": source1.FS,
 			},
 			layout:         "base",
@@ -195,12 +194,13 @@ func TestTemplateManager(t *testing.T) {
 		}
 		t.Run(tt.name, func(t *testing.T) {
 			// Initialize template manager and load templates
-			tm, err := gtml.NewTemplateManager(gtml.TemplateManagerOptions{
-				Extension: ".gtml",
-				Sources:   tt.sources,
-				Funcs:     funcMap,
-				Logger:    logger,
-			})
+			tm, err := gtml.NewTemplateManager(
+				tt.sources,
+				gtml.TemplateManagerOptions{
+					Extension: ".gtml",
+					Funcs:     funcMap,
+					Logger:    logger,
+				})
 
 			require.NoError(t, err, "Failed to load templates")
 
